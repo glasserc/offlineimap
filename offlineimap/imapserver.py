@@ -20,7 +20,7 @@ from offlineimap import imaplib2, imaplibutil, imaputil, threadutil
 from offlineimap.ui import UIBase
 from offlineimap.accounts import syncfolder
 from threading import *
-import thread, hmac, os, time
+import thread, hmac, os, time, socket
 import base64
 
 from StringIO import StringIO
@@ -264,15 +264,17 @@ class IMAPServer:
                 # Generate a new connection.
                 if self.tunnel:
                     UIBase.getglobalui().connecting('tunnel', self.tunnel)
-                    imapobj = UsefulIMAP4_Tunnel(self.tunnel)
+                    imapobj = UsefulIMAP4_Tunnel(self.tunnel, timeout=socket.getdefaulttimeout())
                     success = 1
                 elif self.usessl:
                     UIBase.getglobalui().connecting(self.hostname, self.port)
                     imapobj = UsefulIMAP4_SSL(self.hostname, self.port,
-                                              self.sslclientkey, self.sslclientcert)
+                                              self.sslclientkey, self.sslclientcert,
+                                              timeout=socket.getdefaulttimeout())
                 else:
                     UIBase.getglobalui().connecting(self.hostname, self.port)
-                    imapobj = UsefulIMAP4(self.hostname, self.port)
+                    imapobj = UsefulIMAP4(self.hostname, self.port,
+                                          timeout=socket.getdefaulttimeout())
 
                 imapobj.mustquote = imaplibutil.mustquote
 
