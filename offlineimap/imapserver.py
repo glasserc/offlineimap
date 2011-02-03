@@ -447,9 +447,6 @@ class IdleThread(object):
         ui.unregisterthread(currentThread())
 
     def idle(self):
-        imapobj = self.parent.acquireconnection()
-        imapobj.select(self.folder)
-        self.parent.releaseconnection(imapobj)
         while True:
             if self.event.isSet():
                 return
@@ -466,6 +463,7 @@ class IdleThread(object):
                     self.event.set()
 
             imapobj = self.parent.acquireconnection()
+            imapobj.select(self.folder)
             if "IDLE" in imapobj.capabilities:
                 imapobj.idle(callback=callback)
             else:
