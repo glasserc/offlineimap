@@ -454,10 +454,17 @@ class IdleThread(object):
             if self.event.isSet():
                 return
             self.needsync = False
+            self.imapaborted = False
             def callback(args):
-                if not self.event.isSet():
-                    self.needsync = True
+                if args[2] is None:
+                    if not self.event.isSet():
+                        self.needsync = True
+                        self.event.set()
+                else:
+                    # We got an "abort" signal.
+                    self.imapaborted = True
                     self.event.set()
+
             imapobj = self.parent.acquireconnection()
             if "IDLE" in imapobj.capabilities:
                 imapobj.idle(callback=callback)
@@ -465,7 +472,11 @@ class IdleThread(object):
                 imapobj.noop()
             self.event.wait()
             if self.event.isSet():
-                imapobj.noop()
+                if not self.imapaborted:
+                    # Can't NOOP on a bad connection.
+                    imapobj.noop()
+                    # We don't do event.clear() so that we'll fall out
+                    # of the loop next time around.
             self.parent.releaseconnection(imapobj)
             if self.needsync:
                 self.event.clear()
