@@ -70,6 +70,10 @@ class IMAPServer:
         self.availableconnections = []
         self.assignedconnections = []
         self.lastowner = {}
+        self.can_i_connect = Lock()
+        self.folder_syncing = {}  # folder name -> Event
+        self.folder_idling = {} # folder name -> IdleThread
+        self.folder_connection = {} # folder name -> [imapobj]
         self.semaphore = BoundedSemaphore(self.maxconnections)
         self.connectionlock = Lock()
         self.reference = reference
@@ -112,8 +116,28 @@ class IMAPServer:
             connection.logout()
         else:
             self.availableconnections.append(connection)
+        # FIXME: consult connection.mailbox, for example?
+        for folder, connections in self.folder_connection.items():
+            if connection in connections:
+                connections.remove(connection)
         self.connectionlock.release()
         self.semaphore.release()
+
+    def register_idling(self, folder, idler):
+        self.folder_idling[folder] = idler
+
+    def unregister_idling(self, folder):
+        del self.folder_idling[folder]
+
+    def register_syncing(self, folder):
+        self.folder_syncing[folder] = Event()
+
+    def unregister_syncing(self, folder):
+        self.folder_syncing[folder].set()
+
+    def wait_for_sync(self, folder):
+        if folder in self.folder_syncing:
+            self.folder_syncing[folder].wait()
 
     def md5handler(self, response):
         challenge = response.strip()
@@ -155,14 +179,20 @@ class IMAPServer:
             response = ''
         return base64.b64decode(response)
 
-    def acquireconnection(self):
+    def acquireconnection(self, for_folder=None):
         """Fetches a connection from the pool, making sure to create a new one
         if needed, to obey the maximum connection limits, etc.
         Opens a connection to the server and returns an appropriate
         object."""
 
+        self.can_i_connect.acquire()
+        # FIXME: find any threads idling on for_folder, and kick them.
         self.semaphore.acquire()
+        # If no connections are available, then kick a random thread.
+        # can_i_connect will prevent other people from grabbing the
+        # newly-freed connection.
         self.connectionlock.acquire()
+        self.can_i_connect.release()
         imapobj = None
 
         if len(self.availableconnections): # One is available.
@@ -182,6 +212,7 @@ class IMAPServer:
             self.assignedconnections.append(imapobj)
             self.lastowner[imapobj] = get_ident()
             self.connectionlock.release()
+            self.folder_connection.setdefault(for_folder, []).append(imapobj)
             return imapobj
         
         self.connectionlock.release()   # Release until need to modify data
@@ -269,6 +300,7 @@ class IMAPServer:
             self.assignedconnections.append(imapobj)
             self.lastowner[imapobj] = get_ident()
             self.connectionlock.release()
+            self.folder_connection.setdefault(for_folder, []).append(imapobj)
             return imapobj
         except Exception, e:
             """If we are here then we did not succeed in getting a
@@ -387,7 +419,7 @@ class IdleThread(object):
         self.thread.join()
 
     def noop(self):
-        imapobj = self.parent.acquireconnection()
+        imapobj = self.parent.acquireconnection(for_folder="NOOP")
         imapobj.noop()
         self.event.wait()
         self.parent.releaseconnection(imapobj)
@@ -399,7 +431,11 @@ class IdleThread(object):
         remoterepos = account.remoterepos
         statusrepos = account.statusrepos
         remotefolder = remoterepos.getfolder(self.folder)
+        localrepos.register_syncing(self.folder)
+        remoterepos.register_syncing(remotefolder)
         offlineimap.accounts.syncfolder(account.name, remoterepos, remotefolder, localrepos, statusrepos, quick=False)
+        localrepos.unregister_syncing(self.folder)
+        remoterepos.unregister_syncing(remotefolder)
         ui = getglobalui()
         ui.unregisterthread(currentThread())
 
@@ -431,7 +467,9 @@ class IdleThread(object):
                     self.imapaborted = True
                     self.stop()
 
-            imapobj = self.parent.acquireconnection()
+            self.parent.wait_for_sync(self.folder)
+            imapobj = self.parent.acquireconnection(for_folder=self.folder)
+            self.parent.register_idling(self.folder, self)
             imapobj.select(self.folder)
             if "IDLE" in imapobj.capabilities:
                 imapobj.idle(callback=callback)
@@ -444,6 +482,7 @@ class IdleThread(object):
                     imapobj.noop()
                     # We don't do event.clear() so that we'll fall out
                     # of the loop next time around.
+            self.parent.unregister_idling(self.folder)
             self.parent.releaseconnection(imapobj)
             if self.needsync or self.reconnect:
                 self.event.clear()
