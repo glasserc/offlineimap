@@ -412,7 +412,10 @@ class IdleThread(object):
                     self.event.set()
             imapobj = self.parent.acquireconnection()
             imapobj.select(self.folder)
-            imapobj.idle(callback=callback)
+            if "IDLE" in imapobj.capabilities:
+                imapobj.idle(callback=callback)
+            else:
+                imapobj.noop()
             self.event.wait()
             if self.event.isSet():
                 imapobj.noop()
