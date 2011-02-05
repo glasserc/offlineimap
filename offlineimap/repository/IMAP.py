@@ -298,7 +298,13 @@ class IMAPRepository(BaseRepository):
                 raise RuntimeError, "Repository %s could not create folder %s: %s" % (self.getname(), foldername, str(result))
         finally:
             self.imapserver.releaseconnection(imapobj)
-            
+
+    def register_syncing(self, folder):
+        self.imapserver.register_syncing(folder)
+
+    def unregister_syncing(self, folder):
+        self.imapserver.unregister_syncing(folder)
+
 class MappedIMAPRepository(IMAPRepository):
     def getfoldertype(self):
         return MappedIMAPFolder

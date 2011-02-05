@@ -188,4 +188,9 @@ class BaseRepository(CustomConfig.ConfigHelperMixin):
         """Stop keep alive, but don't bother waiting
         for the threads to terminate."""
         pass
-    
+
+    def register_syncing(self, folder):
+        pass
+
+    def unregister_syncing(self, folder):
+        pass
