@@ -374,6 +374,8 @@ class IdleThread(object):
         else:
             self.thread = Thread(target=self.idle)
         self.thread.setDaemon(1)
+        # Lets us disconnect temporarily by setting self.event.
+        self.reconnect = True
 
     def start(self):
         self.thread.start()
@@ -401,12 +403,24 @@ class IdleThread(object):
         ui = getglobalui()
         ui.unregisterthread(currentThread())
 
+    def releaseconn(self):
+        """Releases the connection, but doesn't stop the thread.
+
+        Useful if someone else wants to use our inactive
+        connection. We'll reclaim the connection later.
+
+        """
+        UIBase.getglobalui().debug('imap','***idle: asked to release - %s' % self.username)
+        self.reconnect = True
+        self.event.set()
+
     def idle(self):
         while True:
             if self.event.isSet():
                 return
             self.needsync = False
             self.imapaborted = False
+            self.reconnect = False
             def callback(args):
                 if args[2] is None:
                     if not self.event.isSet():
@@ -431,8 +445,9 @@ class IdleThread(object):
                     # We don't do event.clear() so that we'll fall out
                     # of the loop next time around.
             self.parent.releaseconnection(imapobj)
-            if self.needsync:
+            if self.needsync or self.reconnect:
                 self.event.clear()
+            if self.needsync:
                 self.dosync()
 
 class ConfigedIMAPServer(IMAPServer):
