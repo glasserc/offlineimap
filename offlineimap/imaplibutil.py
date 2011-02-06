@@ -187,20 +187,6 @@ class WrappedIMAP4_SSL(IMAP4_SSL):
             return retval
         return self.sslobj.read(min(n, 16384))
 
-    def read(self, n):
-        """Read exactly n bytes
-
-        As done in IMAP4_SSL.read() API. If read returns less than n
-        bytes, things break left and right."""
-        chunks = []
-        read = 0
-        while read < n:
-            data = self._read_upto (n-read)
-            read += len(data)
-            chunks.append(data)
-
-        return ''.join(chunks)
-
     def readline(self):
         """Get the next line. This implementation is more efficient
         than IMAP4_SSL.readline() which reads one char at a time and
