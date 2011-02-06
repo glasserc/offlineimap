@@ -49,10 +49,7 @@ class IMAP4_Tunnel(IMAP4):
         self.read_fd = self.infd.fileno()
 
     def read(self, size):
-        retval = ''
-        while len(retval) < size:
-            retval += self.infd.read(size - len(retval))
-        return retval
+        return os.read(self.read_fd, size)
 
     def readline(self):
         return self.infd.readline()
