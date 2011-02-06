@@ -74,7 +74,7 @@ class IMAPFolder(BaseFolder):
         try:
             # Primes untagged_responses
             self.selectro(imapobj)
-            return long(imapobj.untagged_responses['UIDVALIDITY'][0])
+            return long(imapobj._get_untagged_response('UIDVALIDITY', True)[0])
         finally:
             self.imapserver.releaseconnection(imapobj)
     
@@ -85,14 +85,14 @@ class IMAPFolder(BaseFolder):
         imapobj = self.imapserver.acquireconnection()
         try:
             # Primes untagged_responses
-            imapobj.select(self.getfullname(), readonly = 1, force = 1)
+            imaptype, imapdata = imapobj.select(self.getfullname(), readonly = 1, force = 1)
             try:
                 # 1. Some mail servers do not return an EXISTS response
                 # if the folder is empty.  2. ZIMBRA servers can return
                 # multiple EXISTS replies in the form 500, 1000, 1500,
                 # 1623 so check for potentially multiple replies.
                 maxmsgid = 0
-                for msgid in imapobj.untagged_responses['EXISTS']:
+                for msgid in imapdata:
                     maxmsgid = max(long(msgid), maxmsgid)
             except KeyError:
                 return True
@@ -130,7 +130,7 @@ class IMAPFolder(BaseFolder):
 
         try:
             # Primes untagged_responses
-            imapobj.select(self.getfullname(), readonly = 1, force = 1)
+            imaptype, imapdata = imapobj.select(self.getfullname(), readonly = 1, force = 1)
 
             maxage = self.config.getdefaultint("Account " + self.accountname, "maxage", -1)
             maxsize = self.config.getdefaultint("Account " + self.accountname, "maxsize", -1)
@@ -178,8 +178,10 @@ class IMAPFolder(BaseFolder):
                     # multiple EXISTS replies in the form 500, 1000, 1500,
                     # 1623 so check for potentially multiple replies.
                     maxmsgid = 0
-                    for msgid in imapobj.untagged_responses['EXISTS']:
+                    for msgid in imapdata:
                         maxmsgid = max(long(msgid), maxmsgid)
+
+                    maxmsgid = long(imapdata[0])
                     messagesToFetch = '1:%d' % maxmsgid;
                 except KeyError:
                     return
@@ -257,8 +259,8 @@ class IMAPFolder(BaseFolder):
         return leader + newline + trailer
 
     def savemessage_searchforheader(self, imapobj, headername, headervalue):
-        if imapobj.untagged_responses.has_key('APPENDUID'):
-            return long(imapobj.untagged_responses['APPENDUID'][-1].split(' ')[1])
+        if imapobj._get_untagged_response('APPENDUID', True):
+            return long(imapobj._get_untagged_response('APPENDUID', True)[-1].split(' ')[1])
 
         self.ui.debug('imap', 'savemessage_searchforheader called for %s: %s' % \
                  (headername, headervalue))
