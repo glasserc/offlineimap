@@ -19,6 +19,7 @@
 from offlineimap import imaplib2 as imaplib
 from offlineimap import imaplibutil, imaputil, threadutil
 from offlineimap.ui import getglobalui
+from offlineimap.accounts import syncfolder
 from threading import *
 import thread, hmac, os, time
 import base64
@@ -399,6 +400,63 @@ class IMAPServer:
                 self.releaseconnection(imapobj)
 
             self.ui.debug('imap', 'keepalive: bottom of loop')
+
+class IdleThread(object):
+    def __init__(self, parent, folder=None):
+        self.parent = parent
+        self.folder = folder
+        self.event = Event()
+        if folder is None:
+            self.thread = Thread(target=self.noop)
+        else:
+            self.thread = Thread(target=self.idle)
+        self.thread.setDaemon(1)
+
+    def start(self):
+        self.thread.start()
+
+    def stop(self):
+        self.event.set()
+
+    def join(self):
+        self.thread.join()
+
+    def noop(self):
+        imapobj = self.parent.acquireconnection()
+        imapobj.noop()
+        self.event.wait()
+        self.parent.releaseconnection(imapobj)
+
+    def dosync(self):
+        remoterepos = self.parent.repos
+        account = remoterepos.account
+        localrepos = account.localrepos
+        remoterepos = account.remoterepos
+        statusrepos = account.statusrepos
+        remotefolder = remoterepos.getfolder(self.folder)
+        syncfolder(account.name, remoterepos, remotefolder, localrepos, statusrepos, quick=False)
+        ui = getglobalui()
+        ui.unregisterthread(currentThread())
+
+    def idle(self):
+        while True:
+            if self.event.isSet():
+                return
+            self.needsync = False
+            def callback(args):
+                if not self.event.isSet():
+                    self.needsync = True
+                    self.event.set()
+            imapobj = self.parent.acquireconnection()
+            imapobj.select(self.folder)
+            imapobj.idle(callback=callback)
+            self.event.wait()
+            if self.event.isSet():
+                imapobj.noop()
+            self.parent.releaseconnection(imapobj)
+            if self.needsync:
+                self.event.clear()
+                self.dosync()
 
 class ConfigedIMAPServer(IMAPServer):
     """This class is designed for easier initialization given a ConfigParser
