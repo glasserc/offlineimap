@@ -27,16 +27,16 @@ fi
 # additionally to the file test-results/$BASENAME.out, too.
 case "$GIT_TEST_TEE_STARTED, $* " in
 done,*)
-	# do not redirect again
-	;;
+        # do not redirect again
+        ;;
 *' --tee '*|*' --va'*)
-	mkdir -p test-results
-	BASE=test-results/$(basename "$0" .sh)
-	(GIT_TEST_TEE_STARTED=done ${SHELL-sh} "$0" "$@" 2>&1;
-	 echo $? > $BASE.exit) | tee $BASE.out
-	test "$(cat $BASE.exit)" = 0
-	exit
-	;;
+        mkdir -p test-results
+        BASE=test-results/$(basename "$0" .sh)
+        (GIT_TEST_TEE_STARTED=done ${SHELL-sh} "$0" "$@" 2>&1;
+         echo $? > $BASE.exit) | tee $BASE.out
+        test "$(cat $BASE.exit)" = 0
+        exit
+        ;;
 esac
 
 # Keep the original TERM for say_color
@@ -73,84 +73,84 @@ _x32="$_x04$_x04$_x04$_x04$_x04$_x04$_x04$_x04"
 # '
 # . ./test-lib.sh
 [ "x$ORIGINAL_TERM" != "xdumb" ] && (
-		TERM=$ORIGINAL_TERM &&
-		export TERM &&
-		[ -t 1 ] &&
-		tput bold >/dev/null 2>&1 &&
-		tput setaf 1 >/dev/null 2>&1 &&
-		tput sgr0 >/dev/null 2>&1
-	) &&
-	color=t
+                TERM=$ORIGINAL_TERM &&
+                export TERM &&
+                [ -t 1 ] &&
+                tput bold >/dev/null 2>&1 &&
+                tput setaf 1 >/dev/null 2>&1 &&
+                tput sgr0 >/dev/null 2>&1
+        ) &&
+        color=t
 
 while test "$#" -ne 0
 do
-	case "$1" in
-	-d|--d|--de|--deb|--debu|--debug)
-		debug=t; shift ;;
-	-i|--i|--im|--imm|--imme|--immed|--immedi|--immedia|--immediat|--immediate)
-		immediate=t; shift ;;
-	-l|--l|--lo|--lon|--long|--long-|--long-t|--long-te|--long-tes|--long-test|--long-tests)
-		GIT_TEST_LONG=t; export GIT_TEST_LONG; shift ;;
-	-h|--h|--he|--hel|--help)
-		help=t; shift ;;
-	-v|--v|--ve|--ver|--verb|--verbo|--verbos|--verbose)
-		verbose=t; shift ;;
-	-q|--q|--qu|--qui|--quie|--quiet)
-		quiet=t; shift ;;
-	--with-dashes)
-		with_dashes=t; shift ;;
-	--no-color)
-		color=; shift ;;
-	--no-python)
-		# noop now...
-		shift ;;
-	--va|--val|--valg|--valgr|--valgri|--valgrin|--valgrind)
-		valgrind=t; verbose=t; shift ;;
-	--tee)
-		shift ;; # was handled already
-	--root=*)
-		root=$(expr "z$1" : 'z[^=]*=\(.*\)')
-		shift ;;
-	*)
-		echo "error: unknown test option '$1'" >&2; exit 1 ;;
-	esac
+        case "$1" in
+        -d|--d|--de|--deb|--debu|--debug)
+                debug=t; shift ;;
+        -i|--i|--im|--imm|--imme|--immed|--immedi|--immedia|--immediat|--immediate)
+                immediate=t; shift ;;
+        -l|--l|--lo|--lon|--long|--long-|--long-t|--long-te|--long-tes|--long-test|--long-tests)
+                GIT_TEST_LONG=t; export GIT_TEST_LONG; shift ;;
+        -h|--h|--he|--hel|--help)
+                help=t; shift ;;
+        -v|--v|--ve|--ver|--verb|--verbo|--verbos|--verbose)
+                verbose=t; shift ;;
+        -q|--q|--qu|--qui|--quie|--quiet)
+                quiet=t; shift ;;
+        --with-dashes)
+                with_dashes=t; shift ;;
+        --no-color)
+                color=; shift ;;
+        --no-python)
+                # noop now...
+                shift ;;
+        --va|--val|--valg|--valgr|--valgri|--valgrin|--valgrind)
+                valgrind=t; verbose=t; shift ;;
+        --tee)
+                shift ;; # was handled already
+        --root=*)
+                root=$(expr "z$1" : 'z[^=]*=\(.*\)')
+                shift ;;
+        *)
+                echo "error: unknown test option '$1'" >&2; exit 1 ;;
+        esac
 done
 
 if test -n "$color"; then
-	say_color () {
-		(
-		TERM=$ORIGINAL_TERM
-		export TERM
-		case "$1" in
-			error) tput bold; tput setaf 1;; # bold red
-			skip)  tput bold; tput setaf 2;; # bold green
-			pass)  tput setaf 2;;            # green
-			info)  tput setaf 3;;            # brown
-			*) test -n "$quiet" && return;;
-		esac
-		shift
-		printf " "
+        say_color () {
+                (
+                TERM=$ORIGINAL_TERM
+                export TERM
+                case "$1" in
+                        error) tput bold; tput setaf 1;; # bold red
+                        skip)  tput bold; tput setaf 2;; # bold green
+                        pass)  tput setaf 2;;            # green
+                        info)  tput setaf 3;;            # brown
+                        *) test -n "$quiet" && return;;
+                esac
+                shift
+                printf " "
                 printf "$@"
-		tput sgr0
-		)
-	}
+                tput sgr0
+                )
+        }
 else
-	say_color() {
-		test -z "$1" && test -n "$quiet" && return
-		shift
-		printf " "
+        say_color() {
+                test -z "$1" && test -n "$quiet" && return
+                shift
+                printf " "
                 printf "$@"
-	}
+        }
 fi
 
 error () {
-	say_color error "error: $*\n"
-	GIT_EXIT_OK=t
-	exit 1
+        say_color error "error: $*\n"
+        GIT_EXIT_OK=t
+        exit 1
 }
 
 say () {
-	say_color info "$*"
+        say_color info "$*"
 }
 
 test "${test_description}" != "" ||
@@ -158,8 +158,8 @@ error "Test script did not set test_description."
 
 if test "$help" = "t"
 then
-	echo "Tests ${test_description}"
-	exit 0
+        echo "Tests ${test_description}"
+        exit 0
 fi
 
 echo $(basename "$0"): "Testing ${test_description}"
@@ -173,51 +173,51 @@ test_broken=0
 test_success=0
 
 die () {
-	code=$?
-	if test -n "$GIT_EXIT_OK"
-	then
-		exit $code
-	else
-		echo >&5 "FATAL: Unexpected exit with code $code"
-		exit 1
-	fi
+        code=$?
+        if test -n "$GIT_EXIT_OK"
+        then
+                exit $code
+        else
+                echo >&5 "FATAL: Unexpected exit with code $code"
+                exit 1
+        fi
 }
 
 GIT_EXIT_OK=
 trap 'die' EXIT
 
 test_decode_color () {
-	sed	-e 's/.\[1m/<WHITE>/g' \
-		-e 's/.\[31m/<RED>/g' \
-		-e 's/.\[32m/<GREEN>/g' \
-		-e 's/.\[33m/<YELLOW>/g' \
-		-e 's/.\[34m/<BLUE>/g' \
-		-e 's/.\[35m/<MAGENTA>/g' \
-		-e 's/.\[36m/<CYAN>/g' \
-		-e 's/.\[m/<RESET>/g'
+        sed     -e 's/.\[1m/<WHITE>/g' \
+                -e 's/.\[31m/<RED>/g' \
+                -e 's/.\[32m/<GREEN>/g' \
+                -e 's/.\[33m/<YELLOW>/g' \
+                -e 's/.\[34m/<BLUE>/g' \
+                -e 's/.\[35m/<MAGENTA>/g' \
+                -e 's/.\[36m/<CYAN>/g' \
+                -e 's/.\[m/<RESET>/g'
 }
 
 q_to_nul () {
-	perl -pe 'y/Q/\000/'
+        perl -pe 'y/Q/\000/'
 }
 
 q_to_cr () {
-	tr Q '\015'
+        tr Q '\015'
 }
 
 append_cr () {
-	sed -e 's/$/Q/' | tr Q '\015'
+        sed -e 's/$/Q/' | tr Q '\015'
 }
 
 remove_cr () {
-	tr '\015' Q | sed -e 's/Q$//'
+        tr '\015' Q | sed -e 's/Q$//'
 }
 
 test_begin_subtest ()
 {
     if [ -n "$inside_subtest" ]; then
-	exec 1>&6 2>&7		# Restore stdout and stderr
-	error "bug in test script: Missing test_expect_equal in ${BASH_SOURCE[1]}:${BASH_LINENO[0]}"
+        exec 1>&6 2>&7          # Restore stdout and stderr
+        error "bug in test script: Missing test_expect_equal in ${BASH_SOURCE[1]}:${BASH_LINENO[0]}"
     fi
     test_subtest_name="$1"
     # Remember stdout and stderr file descriptios and redirect test
@@ -236,70 +236,70 @@ test_begin_subtest ()
 # name.
 test_expect_equal ()
 {
-	exec 1>&6 2>&7		# Restore stdout and stderr
-	inside_subtest=
-	test "$#" = 3 && { prereq=$1; shift; } || prereq=
-	test "$#" = 2 ||
-	error "bug in the test script: not 2 or 3 parameters to test_expect_equal"
+        exec 1>&6 2>&7          # Restore stdout and stderr
+        inside_subtest=
+        test "$#" = 3 && { prereq=$1; shift; } || prereq=
+        test "$#" = 2 ||
+        error "bug in the test script: not 2 or 3 parameters to test_expect_equal"
 
-	output="$1"
-	expected="$2"
-	if ! test_skip "$@"
-	then
-		if [ "$output" = "$expected" ]; then
-			test_ok_ "$test_subtest_name"
-		else
-			testname=$this_test.$test_count
-			echo "$expected" > $testname.expected
-			echo "$output" > $testname.output
-			test_failure_ "$test_subtest_name" "$(diff -u $testname.expected $testname.output)"
-		fi
+        output="$1"
+        expected="$2"
+        if ! test_skip "$@"
+        then
+                if [ "$output" = "$expected" ]; then
+                        test_ok_ "$test_subtest_name"
+                else
+                        testname=$this_test.$test_count
+                        echo "$expected" > $testname.expected
+                        echo "$output" > $testname.output
+                        test_failure_ "$test_subtest_name" "$(diff -u $testname.expected $testname.output)"
+                fi
     fi
 }
 
 test_expect_equal_file ()
 {
-	exec 1>&6 2>&7		# Restore stdout and stderr
-	inside_subtest=
-	test "$#" = 3 && { prereq=$1; shift; } || prereq=
-	test "$#" = 2 ||
-	error "bug in the test script: not 2 or 3 parameters to test_expect_equal"
+        exec 1>&6 2>&7          # Restore stdout and stderr
+        inside_subtest=
+        test "$#" = 3 && { prereq=$1; shift; } || prereq=
+        test "$#" = 2 ||
+        error "bug in the test script: not 2 or 3 parameters to test_expect_equal"
 
-	output="$1"
-	expected="$2"
-	if ! test_skip "$@"
-	then
-		if diff -q "$expected" "$output" >/dev/null ; then
-			test_ok_ "$test_subtest_name"
-		else
-			testname=$this_test.$test_count
-			cp "$output" $testname.output
-			cp "$expected" $testname.expected
-			test_failure_ "$test_subtest_name" "$(diff -u $testname.expected $testname.output)"
-		fi
+        output="$1"
+        expected="$2"
+        if ! test_skip "$@"
+        then
+                if diff -q "$expected" "$output" >/dev/null ; then
+                        test_ok_ "$test_subtest_name"
+                else
+                        testname=$this_test.$test_count
+                        cp "$output" $testname.output
+                        cp "$expected" $testname.expected
+                        test_failure_ "$test_subtest_name" "$(diff -u $testname.expected $testname.output)"
+                fi
     fi
 }
 
 test_expect_equal_failure ()
 {
-	exec 1>&6 2>&7		# Restore stdout and stderr
-	inside_subtest=
-	test "$#" = 3 && { prereq=$1; shift; } || prereq=
-	test "$#" = 2 ||
-	error "bug in the test script: not 2 or 3 parameters to test_expect_equal"
+        exec 1>&6 2>&7          # Restore stdout and stderr
+        inside_subtest=
+        test "$#" = 3 && { prereq=$1; shift; } || prereq=
+        test "$#" = 2 ||
+        error "bug in the test script: not 2 or 3 parameters to test_expect_equal"
 
-	output="$1"
-	expected="$2"
-	if ! test_skip "$@"
-	then
-		if [ "$output" = "$expected" ]; then
-			test_known_broken_ok_ "$test_subtest_name"
-		else
-			test_known_broken_failure_ "$test_subtest_name"
-			testname=$this_test.$test_count
-			echo "$expected" > $testname.expected
-			echo "$output" > $testname.output
-		fi
+        output="$1"
+        expected="$2"
+        if ! test_skip "$@"
+        then
+                if [ "$output" = "$expected" ]; then
+                        test_known_broken_ok_ "$test_subtest_name"
+                else
+                        test_known_broken_failure_ "$test_subtest_name"
+                        testname=$this_test.$test_count
+                        echo "$expected" > $testname.expected
+                        echo "$output" > $testname.output
+                fi
     fi
 }
 
@@ -315,137 +315,137 @@ test_expect_equal_failure ()
 # capital letters by convention).
 
 test_set_prereq () {
-	satisfied="$satisfied$1 "
+        satisfied="$satisfied$1 "
 }
 satisfied=" "
 
 test_have_prereq () {
-	case $satisfied in
-	*" $1 "*)
-		: yes, have it ;;
-	*)
-		! : nope ;;
-	esac
+        case $satisfied in
+        *" $1 "*)
+                : yes, have it ;;
+        *)
+                ! : nope ;;
+        esac
 }
 
 # You are not expected to call test_ok_ and test_failure_ directly, use
 # the text_expect_* functions instead.
 
 test_ok_ () {
-	test_success=$(($test_success + 1))
-	say_color pass "%-6s" "PASS"
-	echo " $@"
+        test_success=$(($test_success + 1))
+        say_color pass "%-6s" "PASS"
+        echo " $@"
 }
 
 test_failure_ () {
-	test_failure=$(($test_failure + 1))
-	say_color error "%-6s" "FAIL"
-	echo " $1"
-	shift
-	echo "$@" | sed -e 's/^/	/'
-	if test "$verbose" != "t"; then cat test.output; fi
-	test "$immediate" = "" || { GIT_EXIT_OK=t; exit 1; }
+        test_failure=$(($test_failure + 1))
+        say_color error "%-6s" "FAIL"
+        echo " $1"
+        shift
+        echo "$@" | sed -e 's/^/        /'
+        if test "$verbose" != "t"; then cat test.output; fi
+        test "$immediate" = "" || { GIT_EXIT_OK=t; exit 1; }
 }
 
 test_known_broken_ok_ () {
-	test_fixed=$(($test_fixed+1))
-	say_color pass "%-6s" "FIXED"
-	echo " $@"
+        test_fixed=$(($test_fixed+1))
+        say_color pass "%-6s" "FIXED"
+        echo " $@"
 }
 
 test_known_broken_failure_ () {
-	test_broken=$(($test_broken+1))
-	say_color pass "%-6s" "BROKEN"
-	echo " $@"
+        test_broken=$(($test_broken+1))
+        say_color pass "%-6s" "BROKEN"
+        echo " $@"
 }
 
 test_debug () {
-	test "$debug" = "" || eval "$1"
+        test "$debug" = "" || eval "$1"
 }
 
 test_run_ () {
-	test_cleanup=:
-	if test "$verbose" != "t"; then exec 4>test.output 3>&4; fi
-	eval >&3 2>&4 "$1"
-	eval_ret=$?
-	eval >&3 2>&4 "$test_cleanup"
-	return 0
+        test_cleanup=:
+        if test "$verbose" != "t"; then exec 4>test.output 3>&4; fi
+        eval >&3 2>&4 "$1"
+        eval_ret=$?
+        eval >&3 2>&4 "$test_cleanup"
+        return 0
 }
 
 test_skip () {
-	test_count=$(($test_count+1))
-	to_skip=
-	for skp in $NOTMUCH_SKIP_TESTS
-	do
-		case $this_test.$test_count in
-		$skp)
-			to_skip=t
-		esac
-	done
-	if test -z "$to_skip" && test -n "$prereq" &&
-	   ! test_have_prereq "$prereq"
-	then
-		to_skip=t
-	fi
-	case "$to_skip" in
-	t)
-		say_color skip >&3 "skipping test: $@"
-		say_color skip "%-6s" "SKIP"
-		echo " $1"
-		: true
-		;;
-	*)
-		false
-		;;
-	esac
+        test_count=$(($test_count+1))
+        to_skip=
+        for skp in $NOTMUCH_SKIP_TESTS
+        do
+                case $this_test.$test_count in
+                $skp)
+                        to_skip=t
+                esac
+        done
+        if test -z "$to_skip" && test -n "$prereq" &&
+           ! test_have_prereq "$prereq"
+        then
+                to_skip=t
+        fi
+        case "$to_skip" in
+        t)
+                say_color skip >&3 "skipping test: $@"
+                say_color skip "%-6s" "SKIP"
+                echo " $1"
+                : true
+                ;;
+        *)
+                false
+                ;;
+        esac
 }
 
 test_expect_failure () {
-	test "$#" = 3 && { prereq=$1; shift; } || prereq=
-	test "$#" = 2 ||
-	error "bug in the test script: not 2 or 3 parameters to test-expect-failure"
-	if ! test_skip "$@"
-	then
-		test_run_ "$2"
-		if [ "$?" = 0 -a "$eval_ret" = 0 ]
-		then
-			test_known_broken_ok_ "$1"
-		else
-			test_known_broken_failure_ "$1"
-		fi
-	fi
+        test "$#" = 3 && { prereq=$1; shift; } || prereq=
+        test "$#" = 2 ||
+        error "bug in the test script: not 2 or 3 parameters to test-expect-failure"
+        if ! test_skip "$@"
+        then
+                test_run_ "$2"
+                if [ "$?" = 0 -a "$eval_ret" = 0 ]
+                then
+                        test_known_broken_ok_ "$1"
+                else
+                        test_known_broken_failure_ "$1"
+                fi
+        fi
 }
 
 test_expect_success () {
-	test "$#" = 3 && { prereq=$1; shift; } || prereq=
-	test "$#" = 2 ||
-	error "bug in the test script: not 2 or 3 parameters to test-expect-success"
-	if ! test_skip "$@"
-	then
-		test_run_ "$2"
-		if [ "$?" = 0 -a "$eval_ret" = 0 ]
-		then
-			test_ok_ "$1"
-		else
-			test_failure_ "$@"
-		fi
-	fi
+        test "$#" = 3 && { prereq=$1; shift; } || prereq=
+        test "$#" = 2 ||
+        error "bug in the test script: not 2 or 3 parameters to test-expect-success"
+        if ! test_skip "$@"
+        then
+                test_run_ "$2"
+                if [ "$?" = 0 -a "$eval_ret" = 0 ]
+                then
+                        test_ok_ "$1"
+                else
+                        test_failure_ "$@"
+                fi
+        fi
 }
 
 test_expect_code () {
-	test "$#" = 4 && { prereq=$1; shift; } || prereq=
-	test "$#" = 3 ||
-	error "bug in the test script: not 3 or 4 parameters to test-expect-code"
-	if ! test_skip "$@"
-	then
-		test_run_ "$3"
-		if [ "$?" = 0 -a "$eval_ret" = "$1" ]
-		then
-			test_ok_ "$2"
-		else
-			test_failure_ "$@"
-		fi
-	fi
+        test "$#" = 4 && { prereq=$1; shift; } || prereq=
+        test "$#" = 3 ||
+        error "bug in the test script: not 3 or 4 parameters to test-expect-code"
+        if ! test_skip "$@"
+        then
+                test_run_ "$3"
+                if [ "$?" = 0 -a "$eval_ret" = "$1" ]
+                then
+                        test_ok_ "$2"
+                else
+                        test_failure_ "$@"
+                fi
+        fi
 }
 
 # test_external runs external test scripts that provide continuous
@@ -457,137 +457,137 @@ test_expect_code () {
 # Usage: test_external description command arguments...
 # Example: test_external 'Perl API' perl ../path/to/test.pl
 test_external () {
-	test "$#" = 4 && { prereq=$1; shift; } || prereq=
-	test "$#" = 3 ||
-	error >&5 "bug in the test script: not 3 or 4 parameters to test_external"
-	descr="$1"
-	shift
-	if ! test_skip "$descr" "$@"
-	then
-		# Announce the script to reduce confusion about the
-		# test output that follows.
-		say_color "" " run $test_count: $descr ($*)"
-		# Run command; redirect its stderr to &4 as in
-		# test_run_, but keep its stdout on our stdout even in
-		# non-verbose mode.
-		"$@" 2>&4
-		if [ "$?" = 0 ]
-		then
-			test_ok_ "$descr"
-		else
-			test_failure_ "$descr" "$@"
-		fi
-	fi
+        test "$#" = 4 && { prereq=$1; shift; } || prereq=
+        test "$#" = 3 ||
+        error >&5 "bug in the test script: not 3 or 4 parameters to test_external"
+        descr="$1"
+        shift
+        if ! test_skip "$descr" "$@"
+        then
+                # Announce the script to reduce confusion about the
+                # test output that follows.
+                say_color "" " run $test_count: $descr ($*)"
+                # Run command; redirect its stderr to &4 as in
+                # test_run_, but keep its stdout on our stdout even in
+                # non-verbose mode.
+                "$@" 2>&4
+                if [ "$?" = 0 ]
+                then
+                        test_ok_ "$descr"
+                else
+                        test_failure_ "$descr" "$@"
+                fi
+        fi
 }
 
 # Like test_external, but in addition tests that the command generated
 # no output on stderr.
 test_external_without_stderr () {
-	# The temporary file has no (and must have no) security
-	# implications.
-	tmp="$TMPDIR"; if [ -z "$tmp" ]; then tmp=/tmp; fi
-	stderr="$tmp/git-external-stderr.$$.tmp"
-	test_external "$@" 4> "$stderr"
-	[ -f "$stderr" ] || error "Internal error: $stderr disappeared."
-	descr="no stderr: $1"
-	shift
-	if [ ! -s "$stderr" ]; then
-		rm "$stderr"
-		test_ok_ "$descr"
-	else
-		if [ "$verbose" = t ]; then
-			output=`echo; echo Stderr is:; cat "$stderr"`
-		else
-			output=
-		fi
-		# rm first in case test_failure exits.
-		rm "$stderr"
-		test_failure_ "$descr" "$@" "$output"
-	fi
+        # The temporary file has no (and must have no) security
+        # implications.
+        tmp="$TMPDIR"; if [ -z "$tmp" ]; then tmp=/tmp; fi
+        stderr="$tmp/git-external-stderr.$$.tmp"
+        test_external "$@" 4> "$stderr"
+        [ -f "$stderr" ] || error "Internal error: $stderr disappeared."
+        descr="no stderr: $1"
+        shift
+        if [ ! -s "$stderr" ]; then
+                rm "$stderr"
+                test_ok_ "$descr"
+        else
+                if [ "$verbose" = t ]; then
+                        output=`echo; echo Stderr is:; cat "$stderr"`
+                else
+                        output=
+                fi
+                # rm first in case test_failure exits.
+                rm "$stderr"
+                test_failure_ "$descr" "$@" "$output"
+        fi
 }
 
 # This is not among top-level (test_expect_success | test_expect_failure)
 # but is a prefix that can be used in the test script, like:
 #
-#	test_expect_success 'complain and die' '
+#       test_expect_success 'complain and die' '
 #           do something &&
 #           do something else &&
-#	    test_must_fail git checkout ../outerspace
-#	'
+#           test_must_fail git checkout ../outerspace
+#       '
 #
 # Writing this as "! git checkout ../outerspace" is wrong, because
 # the failure could be due to a segv.  We want a controlled failure.
 
 test_must_fail () {
-	"$@"
-	test $? -gt 0 -a $? -le 129 -o $? -gt 192
+        "$@"
+        test $? -gt 0 -a $? -le 129 -o $? -gt 192
 }
 
 # test_cmp is a helper function to compare actual and expected output.
 # You can use it like:
 #
-#	test_expect_success 'foo works' '
-#		echo expected >expected &&
-#		foo >actual &&
-#		test_cmp expected actual
-#	'
+#       test_expect_success 'foo works' '
+#               echo expected >expected &&
+#               foo >actual &&
+#               test_cmp expected actual
+#       '
 #
 # This could be written as either "cmp" or "diff -u", but:
 # - cmp's output is not nearly as easy to read as diff -u
 # - not all diff versions understand "-u"
 
 test_cmp() {
-	$GIT_TEST_CMP "$@"
+        $GIT_TEST_CMP "$@"
 }
 
 # This function can be used to schedule some commands to be run
 # unconditionally at the end of the test to restore sanity:
 #
-#	test_expect_success 'test core.capslock' '
-#		git config core.capslock true &&
-#		test_when_finished "git config --unset core.capslock" &&
-#		hello world
-#	'
+#       test_expect_success 'test core.capslock' '
+#               git config core.capslock true &&
+#               test_when_finished "git config --unset core.capslock" &&
+#               hello world
+#       '
 #
 # That would be roughly equivalent to
 #
-#	test_expect_success 'test core.capslock' '
-#		git config core.capslock true &&
-#		hello world
-#		git config --unset core.capslock
-#	'
+#       test_expect_success 'test core.capslock' '
+#               git config core.capslock true &&
+#               hello world
+#               git config --unset core.capslock
+#       '
 #
 # except that the greeting and config --unset must both succeed for
 # the test to pass.
 
 test_when_finished () {
-	test_cleanup="{ $*
-		} && (exit \"\$eval_ret\"); eval_ret=\$?; $test_cleanup"
+        test_cleanup="{ $*
+                } && (exit \"\$eval_ret\"); eval_ret=\$?; $test_cleanup"
 }
 
 test_done () {
-	GIT_EXIT_OK=t
-	test_results_dir="$TEST_DIRECTORY/test-results"
-	mkdir -p "$test_results_dir"
-	test_results_path="$test_results_dir/${0%.sh}-$$"
+        GIT_EXIT_OK=t
+        test_results_dir="$TEST_DIRECTORY/test-results"
+        mkdir -p "$test_results_dir"
+        test_results_path="$test_results_dir/${0%.sh}-$$"
 
-	echo "total $test_count" >> $test_results_path
-	echo "success $test_success" >> $test_results_path
-	echo "fixed $test_fixed" >> $test_results_path
-	echo "broken $test_broken" >> $test_results_path
-	echo "failed $test_failure" >> $test_results_path
-	echo "" >> $test_results_path
+        echo "total $test_count" >> $test_results_path
+        echo "success $test_success" >> $test_results_path
+        echo "fixed $test_fixed" >> $test_results_path
+        echo "broken $test_broken" >> $test_results_path
+        echo "failed $test_failure" >> $test_results_path
+        echo "" >> $test_results_path
 
-	echo
+        echo
 
-	if [ "$test_failure" = "0" ]; then
-	    if [ "$test_broken" = "0" ]; then	    
-		rm -rf "$remove_tmp"
-	    fi
-	    exit 0
-	else
-	    exit 1
-	fi
+        if [ "$test_failure" = "0" ]; then
+            if [ "$test_broken" = "0" ]; then
+                rm -rf "$remove_tmp"
+            fi
+            exit 0
+        else
+            exit 1
+        fi
 }
 
 # Test repository
@@ -600,9 +600,9 @@ case "$test" in
 esac
 test ! -z "$debug" || remove_tmp=$TMP_DIRECTORY
 rm -fr "$test" || {
-	GIT_EXIT_OK=t
-	echo >&5 "FATAL: Cannot prepare test area"
-	exit 1
+        GIT_EXIT_OK=t
+        echo >&5 "FATAL: Cannot prepare test area"
+        exit 1
 }
 
 # some helper functions useful for testing offlineimap
@@ -668,71 +668,71 @@ cd -P "$test" || error "Cannot setup test environment"
 
 if test "$verbose" = "t"
 then
-	exec 4>&2 3>&1
+        exec 4>&2 3>&1
 else
-	exec 4>test.output 3>&4
+        exec 4>test.output 3>&4
 fi
 
 this_test=${0##*/}
 for skp in $NOTMUCH_SKIP_TESTS
 do
-	to_skip=
-	for skp in $NOTMUCH_SKIP_TESTS
-	do
-		case "$this_test" in
-		$skp)
-			to_skip=t
-		esac
-	done
-	case "$to_skip" in
-	t)
-		say_color skip >&3 "skipping test $this_test altogether"
-		say_color skip "skip all tests in $this_test"
-		test_done
-	esac
+        to_skip=
+        for skp in $NOTMUCH_SKIP_TESTS
+        do
+                case "$this_test" in
+                $skp)
+                        to_skip=t
+                esac
+        done
+        case "$to_skip" in
+        t)
+                say_color skip >&3 "skipping test $this_test altogether"
+                say_color skip "skip all tests in $this_test"
+                test_done
+        esac
 done
 
 # Provide an implementation of the 'yes' utility
 yes () {
-	if test $# = 0
-	then
-		y=y
-	else
-		y="$*"
-	fi
+        if test $# = 0
+        then
+                y=y
+        else
+                y="$*"
+        fi
 
-	while echo "$y"
-	do
-		:
-	done
+        while echo "$y"
+        do
+                :
+        done
 }
 
 # Fix some commands on Windows
 case $(uname -s) in
 *MINGW*)
-	# Windows has its own (incompatible) sort and find
-	sort () {
-		/usr/bin/sort "$@"
-	}
-	find () {
-		/usr/bin/find "$@"
-	}
-	sum () {
-		md5sum "$@"
-	}
-	# git sees Windows-style pwd
-	pwd () {
-		builtin pwd -W
-	}
-	# no POSIX permissions
-	# backslashes in pathspec are converted to '/'
-	# exec does not inherit the PID
-	;;
+        # Windows has its own (incompatible) sort and find
+        sort () {
+                /usr/bin/sort "$@"
+        }
+        find () {
+                /usr/bin/find "$@"
+        }
+        sum () {
+                md5sum "$@"
+        }
+        # git sees Windows-style pwd
+        pwd () {
+                builtin pwd -W
+        }
+        # no POSIX permissions
+        # backslashes in pathspec are converted to '/'
+        # exec does not inherit the PID
+        ;;
 *)
-	test_set_prereq POSIXPERM
-	test_set_prereq BSLASHPSPEC
-	test_set_prereq EXECKEEPSPID
-	;;
+        test_set_prereq POSIXPERM
+        test_set_prereq BSLASHPSPEC
+        test_set_prereq EXECKEEPSPID
+        ;;
 esac
 
 test -z "$NO_PERL" && test_set_prereq PERL
