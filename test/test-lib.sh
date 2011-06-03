@@ -655,22 +655,23 @@ unread_mail() {
     mv $FILE $CURDIR/${ID}
 }
 
-unread_message_count() {
+read_message_count() {
+    MAIL="$1"
     cur=0
-    if [ -x $LOCAL/INBOX/cur/*S ]; then
-        cur=$(ls $LOCAL/INBOX/cur/*S | wc -l)
+    if [ -e $MAIL/cur/*S ]; then
+        cur=$(ls $MAIL/cur/*S | wc -l)
     fi
-    new=$(ls $LOCAL/INBOX/new | wc -l)
-    echo $(( $cur + $new ))
+    echo $cur
 }
 
-read_message_count() {
-    echo $(( `message_count` - `unread_message_count` ))
+unread_message_count() {
+    echo $(( `message_count "$@"` - `read_message_count "$@"` ))
 }
 
 message_count() {
-    cur=$(ls $LOCAL/INBOX/cur | wc -l)
-    new=$(ls $LOCAL/INBOX/new | wc -l)
+    MAIL="$1"
+    cur=$(ls $MAIL/cur | wc -l)
+    new=$(ls $MAIL/new | wc -l)
     echo $(( $cur + $new ))
 }
 
