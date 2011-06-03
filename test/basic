@@ -1,0 +1,11 @@
+#! /bin/env bash
+
+test_description="Simple test of offlineimap sync"
+
+. ./test-lib.sh
+
+test_expect_success 'sanity check' '
+  :
+'
+
+test_done
