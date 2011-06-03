@@ -230,7 +230,7 @@ login_user = ethan
 #
 # </usr/share/doc/dovecot-common/wiki/MailLocation.txt>
 #
-mail_location = 
+mail_location = MAIL_LOCATION
 
 # If you need to set multiple mailbox locations or want to change default
 # namespace settings, you can do it by defining namespace sections.

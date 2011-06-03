@@ -605,6 +605,38 @@ rm -fr "$test" || {
 	exit 1
 }
 
+# some helper functions useful for testing offlineimap
+generate_dovecot.conf() {
+    #cpp -DMAIL_LOCATION="$MAIL" $TEST_DIRECTORY/dovecot.conf.template  `pwd`/dovecot.conf
+    sed s/MAIL_LOCATION/${MAIL//\//\\\/}/ < $TEST_DIRECTORY/dovecot.conf.template > `pwd`/dovecot.conf
+}
+
+run_dovecot() {
+    generate_dovecot.conf
+    dovecot -c `pwd`/dovecot.conf -F &
+}
+
+kill_dovecot() {
+    kill `cat dovecot-run/master.pid`
+}
+
+deliver() {
+    MAIL=maildir:`pwd`/dovecot /usr/lib/dovecot/deliver -c `pwd`/dovecot.conf "$@"
+}
+
+message_count() {
+    cur=$(ls $LOCAL/INBOX/cur | wc -l)
+    new=$(ls $LOCAL/INBOX/new | wc -l)
+    #echo $cur,$new
+    #echo $cur,$new > foo
+    echo $(( $cur + $new ))
+}
+
+offlineimap() {
+    #generate_offlineimaprc "$@"
+    python $TEST_DIRECTORY/../offlineimap.py -c $TEST_DIRECTORY/offlineimap.conf
+}
+
 # A temporary home directory is needed by at least:
 # - emacs/"Sending a message via (fake) SMTP"
 # - emacs/"Reply within emacs"
