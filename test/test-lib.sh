@@ -624,11 +624,53 @@ deliver() {
     MAIL=maildir:`pwd`/dovecot /usr/lib/dovecot/deliver -c `pwd`/dovecot.conf "$@"
 }
 
+# Dovecot moves mail into cur after being accessed, even if it isn't "Seen"
+new_mail_id() {
+    if [ -x "$@"/new/* ]; then
+        echo "$@"/new/*
+    else
+        echo "$@"/cur/*,
+    fi
+
+}
+
+# This assumes you give it a thing in a new/ or cur/ directory, without an S at the end
+read_mail() {
+    FILE="$1"
+    ID=`basename "$FILE"`
+    NEWDIR=`dirname "$FILE"`
+    SUFFIX=S
+    if [ `basename $NEWDIR` -eq "new" ] ; then
+        SUFFIX=:2,S
+    fi
+    MAILDIR=`dirname "$NEWDIR"`
+    mv $FILE $MAILDIR/cur/${ID}${SUFFIX}
+}
+
+# Assumes you gave it something with an S at the end
+unread_mail() {
+    FILE="$1"
+    ID=`basename "$FILE" S`
+    CURDIR=`dirname "$FILE"`
+    mv $FILE $CURDIR/${ID}
+}
+
+unread_message_count() {
+    cur=0
+    if [ -x $LOCAL/INBOX/cur/*S ]; then
+        cur=$(ls $LOCAL/INBOX/cur/*S | wc -l)
+    fi
+    new=$(ls $LOCAL/INBOX/new | wc -l)
+    echo $(( $cur + $new ))
+}
+
+read_message_count() {
+    echo $(( `message_count` - `unread_message_count` ))
+}
+
 message_count() {
     cur=$(ls $LOCAL/INBOX/cur | wc -l)
     new=$(ls $LOCAL/INBOX/new | wc -l)
-    #echo $cur,$new
-    #echo $cur,$new > foo
     echo $(( $cur + $new ))
 }
 

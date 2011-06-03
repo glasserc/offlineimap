@@ -13,16 +13,28 @@ test_expect_failure 'offlineimap bails when config file missing' '
 '
 
 LOCAL=test-maildir
-test_begin_subtest "sync some mail"
 MAIL=maildir:`pwd`/dovecot/ run_dovecot
 deliver -m INBOX < $TEST_DIRECTORY/corpus/0001.txt
+test_begin_subtest "sync some mail -- zero at first"
 test_expect_equal `message_count` 0
 #test_expect_equal 1 2 3 4
 # echo $HOME
 offlineimap
+test_begin_subtest "sync some mail -- got a mail"
 test_expect_equal `message_count` 1
-kill_dovecot
+test_begin_subtest "sync some mail -- mail is unread"
+test_expect_equal `unread_message_count` 1
+test_begin_subtest "sync some mail -- no read mail"
+test_expect_equal `read_message_count` 0
 
+test_begin_subtest "read flags are synced"
+MAIL_ID=`new_mail_id dovecot`
+read_mail $MAIL_ID
+offlineimap
+test_expect_equal `unread_message_count` 0
+
+
+kill_dovecot
 
 
 test_done
