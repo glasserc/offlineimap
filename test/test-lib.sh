@@ -621,15 +621,16 @@ kill_dovecot() {
 }
 
 deliver() {
-    MAIL=maildir:`pwd`/dovecot /usr/lib/dovecot/deliver -c `pwd`/dovecot.conf "$@"
+    /usr/lib/dovecot/deliver -c `pwd`/dovecot.conf "$@"
 }
 
 # Dovecot moves mail into cur after being accessed, even if it isn't "Seen"
 new_mail_id() {
-    if [ -x "$@"/new/* ]; then
-        echo "$@"/new/*
+    MAIL="$1"
+    if [ -e "$MAIL"/new/* ]; then
+        echo "$MAIL"/new/*
     else
-        echo "$@"/cur/*,
+        echo "$MAIL"/cur/*,
     fi
 
 }
@@ -640,7 +641,7 @@ read_mail() {
     ID=`basename "$FILE"`
     NEWDIR=`dirname "$FILE"`
     SUFFIX=S
-    if [ `basename $NEWDIR` -eq "new" ] ; then
+    if [ `basename $ID` == `basename $ID 2,` ] ; then
         SUFFIX=:2,S
     fi
     MAILDIR=`dirname "$NEWDIR"`
